@@ -191,6 +191,9 @@
     <string name="notification_drawer_pref_summary">view and read aloud missed notifications</string>
     <string name="pause_media_during_notification_tts_pref_name">Pause media while reading notifications</string>
     <string name="pause_media_during_notification_tts_pref_summary">pause instead of ducking when reading notifications aloud</string>
+    <string name="pref_category_startup">Startup</string>
+    <string name="auto_open_waze_pref_name">Open Waze after connecting</string>
+    <string name="auto_open_waze_pref_summary">Go straight to Waze when projection is ready and the phone has been unlocked. Spotify is left alone.</string>
     <string name="pref_category_dock">dock</string>
     <string name="show_media_controls_pref_name">Show media controls</string>
     <string name="show_media_controls_pref_summary">requires notification listening permission</string>
