@@ -241,8 +241,9 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
     public boolean onActiveDockTaskSelected(ProjectionTask task) {
         for (AppRecord app : task.getAppRecords()) {
             if ("com.spotify.music".equals(app.launchComponent().getPackageName())) {
-                // When Spotify is already selected, its dock icon toggles the
-                // native Now Playing overlay. The underlying app stays put.
+                if (!settingsManager.isSpotifyCustomPlayerEnabled()) return false;
+                // In Flywheel Player mode, the active Spotify dock item toggles
+                // the custom panel without interrupting Spotify underneath.
                 if (!spotifyNowPlayingPanel.hide()) spotifyNowPlayingPanel.show();
                 return true;
             }
@@ -254,10 +255,9 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
     public void onSwitchTask(ProjectionTask oldTask, boolean oldPinned, ProjectionTask newTask, boolean newPinned) {
         findViewById(R.id.home_dashboard).setVisibility(newTask == null ? View.VISIBLE : View.GONE);
 
-        // Opening Spotify from Home, All Apps, or the media dock automatically
-        // reveals our wide Now Playing view. The Spotify task stays running
-        // beneath it; Back to Spotify simply hides our panel to browse music.
-        // Switching to Waze or another task closes the panel.
+        // The custom panel is opt-in. Native Spotify remains visible by default;
+        // the Flywheel Player mode automatically overlays its wide Now Playing view.
+        // Other apps always hide the panel.
         boolean spotifyOpened = false;
         if (newTask != null) {
             for (AppRecord app : newTask.getAppRecords()) {
@@ -267,7 +267,8 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
                 }
             }
         }
-        if (spotifyOpened) spotifyNowPlayingPanel.show();
+        if (spotifyOpened && settingsManager.isSpotifyCustomPlayerEnabled())
+            spotifyNowPlayingPanel.show();
         else spotifyNowPlayingPanel.hide();
     }
 

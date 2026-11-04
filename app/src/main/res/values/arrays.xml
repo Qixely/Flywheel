@@ -1,0 +1,9 @@
+<resources>
+    <string-array name="spotify_player_mode_entries">
+        <item>Native Spotify (full screen)</item>
+        <item>Flywheel Player (large text)</item>
+    </string-array>
+    <string-array name="spotify_player_mode_values">
+        <item>native</item>
+        <item>flywheel</item>
+    </string-array></resources>

@@ -74,6 +74,7 @@ public class VirtualActivity implements SurfaceHolder.Callback {
     private int width;
     private int height;
     private boolean localDisplayFallback = false;
+    private int spotifyLandscapeConfiguredDisplayId = -1;
 
     private long splashShownAt = 0;
     private boolean validFrame = false;
@@ -184,6 +185,25 @@ public class VirtualActivity implements SurfaceHolder.Callback {
             }
 
             invalidateFrame();
+
+            // Each app gets a new display ID when recreated/reconnected. The
+            // shell-backed daemon applies the two confirmed orientation overrides
+            // before Spotify starts, independent of the Spotify DPI setting.
+            if ("com.spotify.music".equals(app.packageName()) && !localDisplayFallback
+                    && spotifyLandscapeConfiguredDisplayId != getDisplayId()) {
+                try {
+                    if (privd.enableSpotifyLandscape(getDisplayId())) {
+                        spotifyLandscapeConfiguredDisplayId = getDisplayId();
+                        Log.i(TAG, "native Spotify landscape enabled on display " + getDisplayId());
+                    } else {
+                        Log.w(TAG, "Spotify landscape compatibility unavailable on display " + getDisplayId());
+                    }
+                } catch (Throwable t) {
+                    // Orientation overrides are optional. Never prevent Spotify
+                    // from opening if a firmware version doesn't support them.
+                    Log.w(TAG, "Spotify landscape override failed; continuing launch", t);
+                }
+            }
 
             // launch
             try {

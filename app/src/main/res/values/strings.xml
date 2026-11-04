@@ -18,6 +18,11 @@
     <string name="home_all_apps">All apps</string>
     <string name="home_open_app">Open %1$s</string>
     <string name="home_button_content_description">Home dashboard</string>
+    <string name="key_spotify_player_mode">spotify_player_mode</string>
+    <string name="spotify_player_mode_default">native</string>
+    <string name="spotify_player_preference_category">Spotify</string>
+    <string name="spotify_player_pref_title">Now Playing view</string>
+    <string name="spotify_player_pref_summary">Choose the native Spotify player or the optional Flywheel player. Both use your saved Spotify DPI.</string>
     <string name="app_display_scaling_title">App Display Scaling</string>
     <string name="app_display_scaling_summary">Set text and button size separately for Spotify, Waze and other projected apps</string>
     <string name="app_subtitle">A free and open source re-implementation of Android Auto</string>

@@ -18,6 +18,21 @@
     </PreferenceCategory>
 
     <PreferenceCategory
+        app:title="@string/spotify_player_preference_category"
+        app:iconSpaceReserved="false">
+
+        <ListPreference
+            app:key="@string/key_spotify_player_mode"
+            app:title="@string/spotify_player_pref_title"
+            app:entries="@array/spotify_player_mode_entries"
+            app:entryValues="@array/spotify_player_mode_values"
+            app:defaultValue="@string/spotify_player_mode_default"
+            app:useSimpleSummaryProvider="true"
+            app:iconSpaceReserved="false" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
         app:title="@string/pref_category_notifications"
         app:iconSpaceReserved="false"
         >

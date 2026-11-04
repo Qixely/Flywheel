@@ -37,6 +37,10 @@ public class SettingsManager {
     private static final String KEY_ADVANCED_PROJECTED_APP_DPI = "projected_app_dpi_advanced";
     private static final String KEY_APP_PROJECTED_DPI_PREFIX = "projected_app_dpi_override.";
 
+    public static final String SPOTIFY_PLAYER_NATIVE = "native";
+    public static final String SPOTIFY_PLAYER_FLYWHEEL = "flywheel";
+    private static final String KEY_SPOTIFY_PLAYER_MODE = "spotify_player_mode";
+
     private final Context context;
     private final SharedPreferences prefs;
 
@@ -58,6 +62,12 @@ public class SettingsManager {
         int steps = (bounded - PROJECTED_APP_DPI_MIN + PROJECTED_APP_DPI_STEP / 2)
                 / PROJECTED_APP_DPI_STEP;
         return PROJECTED_APP_DPI_MIN + steps * PROJECTED_APP_DPI_STEP;
+    }
+
+    /** Native Spotify is the default; the custom media panel remains optional. */
+    public boolean isSpotifyCustomPlayerEnabled() {
+        return SPOTIFY_PLAYER_FLYWHEEL.equals(
+                prefs.getString(KEY_SPOTIFY_PLAYER_MODE, SPOTIFY_PLAYER_NATIVE));
     }
 
     public int getDefaultProjectedAppDpi() {
