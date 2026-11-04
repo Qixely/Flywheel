@@ -70,7 +70,7 @@ public class VirtualActivity implements SurfaceHolder.Callback {
     private final IPrivd privd;
     private final AppRecord app;
     private VirtualDisplayController virtualDisplay = null;
-    private final int density;
+    private int density;
     private int width;
     private int height;
     private boolean localDisplayFallback = false;
@@ -96,7 +96,8 @@ public class VirtualActivity implements SurfaceHolder.Callback {
         this.settingsManager = settingsManager;
         width = 800;
         height = 600;
-        density = parent.getResources().getDisplayMetrics().densityDpi;
+        density = settingsManager.getEffectiveProjectedAppDpi(app.packageName());
+        Log.i(TAG, "initial app display DPI for " + app.packageName() + ": " + density);
         Context context = parent.getContext();
         LayoutInflater inflater = LayoutInflater.from(context);
 
@@ -218,6 +219,28 @@ public class VirtualActivity implements SurfaceHolder.Callback {
             return true;
         } catch (Throwable ignored) { }
         return false;
+    }
+
+    /**
+     * Called when the user opens/switches back to this app. No change to the
+     * head-unit video/display: only this app's independent virtual display.
+     */
+    public void refreshDisplayDensity() {
+        int selectedDpi = settingsManager.getEffectiveProjectedAppDpi(app.packageName());
+        if (selectedDpi == density) return;
+
+        if (virtualDisplay != null) {
+            try {
+                virtualDisplay.resize(width, height, selectedDpi);
+                invalidateFrame();
+            } catch (Throwable t) {
+                Log.e(TAG, "could not update app DPI for " + app.packageName()
+                        + "; keeping " + density + " DPI", t);
+                return;
+            }
+        }
+        Log.i(TAG, "app display DPI for " + app.packageName() + ": " + density + " -> " + selectedDpi);
+        density = selectedDpi;
     }
 
     public boolean isLaunched() {

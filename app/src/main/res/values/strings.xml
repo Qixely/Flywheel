@@ -18,6 +18,8 @@
     <string name="home_all_apps">All apps</string>
     <string name="home_open_app">Open %1$s</string>
     <string name="home_button_content_description">Home dashboard</string>
+    <string name="app_display_scaling_title">App Display Scaling</string>
+    <string name="app_display_scaling_summary">Set text and button size separately for Spotify, Waze and other projected apps</string>
     <string name="app_subtitle">A free and open source re-implementation of Android Auto</string>
 
     <string name="connection_foreground_notification_channel_name">Active Connection</string>

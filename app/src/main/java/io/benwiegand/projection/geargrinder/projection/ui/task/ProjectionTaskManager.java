@@ -268,7 +268,13 @@ public class ProjectionTaskManager implements PackageService.PackageServiceListe
 
         if (oldTask != null) oldTask.detach(contentFrame);
         activeTask = newTask;
-        if (newTask != null) newTask.attach(contentFrame);
+        if (newTask != null) {
+            // Density changes made in Settings apply at next app selection.
+            // Each VirtualActivity owns a separate display, so the dashboard is unaffected.
+            for (VirtualActivity activity : newTask.getVirtualActivities())
+                activity.refreshDisplayDensity();
+            newTask.attach(contentFrame);
+        }
         callListeners(l -> l.onSwitchTask(oldTask, oldPinned, newTask, newPinned));
 
         requestContentFocus();
