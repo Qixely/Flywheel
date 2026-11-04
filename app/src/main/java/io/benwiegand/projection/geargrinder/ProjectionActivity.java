@@ -19,6 +19,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 
+import io.benwiegand.projection.geargrinder.PackageService;
 import io.benwiegand.projection.geargrinder.callback.AppLauncherListener;
 import io.benwiegand.projection.geargrinder.callback.IPCConnectionListener;
 import io.benwiegand.projection.geargrinder.exception.UserFriendlyException;
@@ -39,7 +40,7 @@ import io.benwiegand.projection.geargrinder.projection.ui.ProjectionModal;
 import io.benwiegand.projection.geargrinder.settings.SettingsManager;
 import io.benwiegand.projection.libprivd.IPrivd;
 
-public class ProjectionActivity extends AppCompatActivity implements MakeshiftBindCallback, IPCConnectionListener, GeargrinderServiceConnector.ConnectionListener, AppDock.Listener, AppLauncherListener, ProjectionTaskManager.Listener {
+public class ProjectionActivity extends AppCompatActivity implements MakeshiftBindCallback, IPCConnectionListener, GeargrinderServiceConnector.ConnectionListener, AppDock.Listener, AppLauncherListener, ProjectionTaskManager.Listener, PackageService.PackageServiceListener {
     private static final String TAG = ProjectionActivity.class.getSimpleName();
 
     private final Handler handler = new Handler(Looper.getMainLooper());
@@ -61,6 +62,10 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
 
     private GeargrinderServiceConnector connector;
     private IPrivd privd = null;
+    private PackageService.ServiceBinder packageBinder;
+    private boolean packageListReady = false;
+    private boolean projectionUnlocked = false;
+    private boolean startupWazeHandled = false;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -127,6 +132,7 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
         super.onDestroy();
         Log.d(TAG, "onDestroy");
 
+        if (packageBinder != null) packageBinder.unregisterListener(this);
         taskManager.unregisterListener(this);
         taskManager.destroy();
 
@@ -165,6 +171,35 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
         return handled || super.onKeyDown(keyCode, event);
     }
 
+    /**
+     * Startup runs only after the phone unlocks, the installed-app list is ready,
+     * and the privileged projection launcher is connected. Never steal focus
+     * from an app the driver already opened. The music app is not touched.
+     */
+    private void maybeAutoOpenWaze() {
+        if (startupWazeHandled || isFinishing() || isDestroyed()) return;
+        if (!settingsManager.isAutoOpenWazeEnabled()) {
+            startupWazeHandled = true;
+            return;
+        }
+        if (!projectionUnlocked || !packageListReady || privd == null || packageBinder == null) return;
+
+        // Once ready, make a single decision for this projection activity.
+        // Do not keep retrying if Waze is missing or the user has opened an app.
+        startupWazeHandled = true;
+        if (taskManager.getActiveTask() != null) {
+            Log.i(TAG, "skipping Waze auto-open: an app is already active");
+            return;
+        }
+        AppRecord waze = packageBinder.getApp("com.waze");
+        if (waze == null) {
+            Log.i(TAG, "Waze is not available; keeping the dashboard visible");
+            return;
+        }
+        Log.i(TAG, "automatically opening Waze on the projected display");
+        taskManager.dynamicOpenSingle(waze);
+    }
+
     @Override
     public void onAppSelected(AppRecord app) {
         taskManager.dynamicOpenSingle(app);
@@ -194,6 +229,14 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
         appDrawer.setPackageBinder(binder);
         notificationDisplay.setPackageServiceBinder(binder);
         taskManager.setPackageServiceBinder(binder);
+        packageBinder = binder;
+        binder.registerListener(this);
+    }
+
+    @Override
+    public void onPackageListUpdated(PackageService.ServiceBinder binder) {
+        packageListReady = true;
+        handler.post(this::maybeAutoOpenWaze);
     }
 
     @Override
@@ -205,6 +248,7 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
     public void onPrivdConnected(IPrivd privd) {
         this.privd = privd;
         taskManager.onPrivdConnected(privd);
+        handler.post(this::maybeAutoOpenWaze);
     }
 
     @Override
@@ -242,6 +286,8 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
             runOnUiThread(() -> {
                 findViewById(R.id.projection_root).setVisibility(View.VISIBLE);
                 keyguardModal.close();
+                projectionUnlocked = true;
+                maybeAutoOpenWaze();
             });
         }
 

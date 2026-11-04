@@ -43,6 +43,10 @@ public class SettingsManager {
         return saveString(R.string.key_privilege_mode, context.getString(privilegeMode.preferenceValueRes()));
     }
 
+    public boolean isAutoOpenWazeEnabled() {
+        return getBool(R.string.key_auto_open_waze, R.string.auto_open_waze_default);
+    }
+
     public boolean allowsStartProjectionWhenLocked() {
         return getBool(R.string.key_start_projection_when_locked, R.string.start_projection_when_locked_default);
     }

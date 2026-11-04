@@ -122,6 +122,7 @@
     <string translatable="false" name="phone_audio_capture_default">true</string>
 
 
+    <string translatable="false" name="auto_open_waze_default">false</string>
     <string translatable="false" name="start_projection_when_locked_default">true</string>
 
 
@@ -170,6 +171,7 @@
     <string translatable="false" name="key_privilege_mode">privilege_mode</string>
     <string translatable="false" name="key_operational_mode">operational_mode</string>
 
+    <string translatable="false" name="key_auto_open_waze">auto_open_waze</string>
     <string translatable="false" name="key_start_projection_when_locked">start_projection_when_locked</string>
     <string translatable="false" name="key_projection_resume_grace_period">projection_resume_grace_period</string>
 
