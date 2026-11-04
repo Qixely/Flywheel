@@ -1,3 +1,14 @@
+> [!NOTE]
+> **Qixely contribution: `feature/home-dashboard`**
+>
+> Add a card-based home interface with navigation, media, and installed-app shortcuts.
+>
+> **[Read what changed, vehicle testing, and upstream considerations](FEATURE_BRANCH_NOTES.md)**.
+> Tested as part of the integrated [`palma2pro-working`](https://github.com/Qixely/Flywheel/tree/palma2pro-working) build; the standalone branch has not been independently rebuilt.
+> The original Flywheel maintainer's README continues below, unchanged.
+
+---
+
 # Flywheel
 > [!caution]
 > - Flywheel is experimental software.
