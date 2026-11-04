@@ -1,5 +1,10 @@
 <resources>
     <string name="app_name">Flywheel</string>
+    <string name="key_spotify_player_mode">spotify_player_mode</string>
+    <string name="spotify_player_mode_default">native</string>
+    <string name="spotify_player_preference_category">Spotify</string>
+    <string name="spotify_player_pref_title">Now Playing view</string>
+    <string name="spotify_player_pref_summary">Choose the native Spotify player or the optional Flywheel player. Both use your saved Spotify DPI.</string>
     <string name="app_subtitle">A free and open source re-implementation of Android Auto</string>
 
     <string name="connection_foreground_notification_channel_name">Active Connection</string>

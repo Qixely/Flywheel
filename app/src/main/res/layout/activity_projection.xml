@@ -56,6 +56,15 @@
                 android:orientation="horizontal"
                 />
 
+            <!-- Native, full-width Spotify player sits over the embedded app task.
+                 Spotify remains open beneath it for instant Back to Spotify. -->
+            <include
+                android:id="@+id/spotify_now_playing"
+                layout="@layout/layout_spotify_now_playing"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone" />
+
             <include
                 android:id="@+id/app_drawer"
                 layout="@layout/layout_app_drawer"

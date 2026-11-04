@@ -58,6 +58,7 @@ public class MediaControlsWidget {
     private final MediaSessionManager mediaSessionManager;
 
     private final Deque<SessionWrapper> orderedMediaSessions = new LinkedList<>();
+    private Runnable spotifySessionListener = () -> {};
 
     public MediaControlsWidget(View root, Handler handler, ProjectionTaskManager taskManager, Supplier<Optional<PackageService.ServiceBinder>> getPackageBinder, SettingsManager settingsManager) {
         context = root.getContext();
@@ -102,6 +103,25 @@ public class MediaControlsWidget {
         });
     }
 
+    /** The full-width player uses the same session data as the dock, not a duplicate session. */
+    public void setSpotifySessionListener(Runnable listener) {
+        spotifySessionListener = listener != null ? listener : () -> {};
+        spotifySessionListener.run();
+    }
+
+    @Nullable
+    public MediaController getSpotifyController() {
+        for (SessionWrapper session : orderedMediaSessions) {
+            if ("com.spotify.music".equals(session.getController().getPackageName()))
+                return session.getController();
+        }
+        return null;
+    }
+
+    private void notifySpotifySessionChanged() {
+        spotifySessionListener.run();
+    }
+
     public void destroy() {
         mediaSessionManager.removeOnActiveSessionsChangedListener(this::onActiveMediaSessionsChanged);
         for (SessionWrapper session : orderedMediaSessions)
@@ -144,6 +164,7 @@ public class MediaControlsWidget {
         artLoaderThread.execute(() -> {
             Bitmap bitmap = metadata.getBitmap(MediaMetadata.METADATA_KEY_ART);
             if (bitmap == null) bitmap = metadata.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART);
+            if (bitmap == null) return null;
             int imageSize = (int) dpToPx(context, 48);
             return Bitmap.createScaledBitmap(bitmap, imageSize, imageSize, true);
         }, bitmap -> {
@@ -201,6 +222,7 @@ public class MediaControlsWidget {
         }
 
         updateNowPlaying();
+        notifySpotifySessionChanged();
     }
 
     private void promoteSessionToActive(SessionWrapper session) {
@@ -349,6 +371,8 @@ public class MediaControlsWidget {
         public void onMetadataChanged(@Nullable MediaMetadata metadata) {
             if (getActiveSession() == this)
                 updateMetadata(this);
+            if ("com.spotify.music".equals(controller.getPackageName()))
+                notifySpotifySessionChanged();
         }
 
         @Override
@@ -368,6 +392,8 @@ public class MediaControlsWidget {
 
             if (getActiveSession() == this)
                 updatePlaybackState(this);
+            if ("com.spotify.music".equals(controller.getPackageName()))
+                notifySpotifySessionChanged();
         }
 
         @Override

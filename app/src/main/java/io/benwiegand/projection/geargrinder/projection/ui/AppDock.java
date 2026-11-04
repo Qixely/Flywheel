@@ -45,6 +45,7 @@ public class AppDock implements ProjectionTaskManager.Listener {
 
     public interface Listener {
         void onAppDrawerSelected();
+        default boolean onActiveDockTaskSelected(ProjectionTask task) { return false; }
     }
 
 
@@ -106,6 +107,7 @@ public class AppDock implements ProjectionTaskManager.Listener {
         View touchTarget = itemView.findViewById(R.id.touch_target);
         touchTarget.setOnClickListener(v -> {
             if (task == taskManager.getActiveTask()) {
+                if (listener.onActiveDockTaskSelected(task)) return;
                 if (!taskManager.requestContentFocus())
                     task.toggleSplash();
             } else {

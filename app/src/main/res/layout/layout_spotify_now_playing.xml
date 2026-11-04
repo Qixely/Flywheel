@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Full-width Spotify media-session player. The left side is optimized for
+     readable text and easy-to-reach playback controls on SYNC 4, while album
+     artwork remains visible in a smaller frame on the right. Ford system
+     chrome and Flywheel's bottom dock remain accessible. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/spotify_now_playing"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/spotify_player_background"
+    android:clickable="true"
+    android:focusable="true"
+    android:visibility="gone">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="32dp"
+        android:paddingVertical="18dp">
+
+        <!-- Text, navigation and playback controls stay on the left. -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.67"
+            android:layout_marginEnd="20dp"
+            android:gravity="center_vertical"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/spotify_player_browse"
+                    android:layout_width="wrap_content"
+                    android:layout_height="60dp"
+                    android:background="@drawable/spotify_player_browse_button"
+                    android:clickable="true"
+                    android:contentDescription="Back to Spotify music selection"
+                    android:focusable="true"
+                    android:gravity="center"
+                    android:paddingHorizontal="20dp"
+                    android:text="&#x2190;  Back to Spotify"
+                    android:textColor="@color/home_text"
+                    android:textSize="19sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_weight="1"
+                    android:ellipsize="end"
+                    android:gravity="end|center_vertical"
+                    android:letterSpacing="0.12"
+                    android:maxLines="1"
+                    android:text="SPOTIFY  /  NOW PLAYING"
+                    android:textColor="@color/home_mint"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+            <TextView
+                android:id="@+id/spotify_player_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:includeFontPadding="false"
+                android:maxLines="2"
+                android:text="Open Spotify to play music"
+                android:textColor="@color/home_text"
+                android:textSize="46sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/spotify_player_artist"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:ellipsize="end"
+                android:includeFontPadding="false"
+                android:maxLines="1"
+                android:text="Your music will appear here"
+                android:textColor="@color/home_secondary"
+                android:textSize="28sp" />
+
+            <TextView
+                android:id="@+id/spotify_player_album"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:ellipsize="end"
+                android:includeFontPadding="false"
+                android:maxLines="1"
+                android:text=""
+                android:textColor="@color/home_muted"
+                android:textSize="20sp" />
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+            <SeekBar
+                android:id="@+id/spotify_player_seek"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:progressTint="@color/home_mint"
+                android:thumbTint="@color/home_mint"
+                android:progress="0"
+                android:max="1000" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <TextView
+                    android:id="@+id/spotify_player_elapsed"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="0:00"
+                    android:textColor="@color/home_secondary"
+                    android:textSize="18sp" />
+                <TextView
+                    android:id="@+id/spotify_player_duration"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="--:--"
+                    android:textColor="@color/home_secondary"
+                    android:textSize="18sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <ImageButton
+                    android:id="@+id/spotify_player_previous"
+                    android:layout_width="74dp"
+                    android:layout_height="74dp"
+                    android:background="@drawable/selectable_item_background_circular"
+                    android:contentDescription="Previous track"
+                    android:padding="10dp"
+                    android:src="@drawable/skip_previous"
+                    app:tint="@color/home_text" />
+
+                <ImageButton
+                    android:id="@+id/spotify_player_play_pause"
+                    android:layout_width="94dp"
+                    android:layout_height="94dp"
+                    android:layout_marginHorizontal="24dp"
+                    android:background="@drawable/spotify_player_play_button"
+                    android:contentDescription="Play or pause"
+                    android:padding="24dp"
+                    android:src="@drawable/play_arrow"
+                    app:tint="@color/home_dark_text" />
+
+                <ImageButton
+                    android:id="@+id/spotify_player_next"
+                    android:layout_width="74dp"
+                    android:layout_height="74dp"
+                    android:background="@drawable/selectable_item_background_circular"
+                    android:contentDescription="Next track"
+                    android:padding="10dp"
+                    android:src="@drawable/skip_next"
+                    app:tint="@color/home_text" />
+            </LinearLayout>
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+        </LinearLayout>
+
+        <!-- Smaller fixed-size album cover on the right: fits both the normal
+             1920px mode and Ford's intermittent 1334px-width startup mode. -->
+        <FrameLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.33">
+
+            <ImageView
+                android:id="@+id/spotify_player_art"
+                android:layout_width="260dp"
+                android:layout_height="260dp"
+                android:layout_gravity="center"
+                android:background="@drawable/spotify_player_art_frame"
+                android:clipToOutline="true"
+                android:contentDescription="Album artwork"
+                android:padding="2dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/music" />
+        </FrameLayout>
+    </LinearLayout>
+</FrameLayout>

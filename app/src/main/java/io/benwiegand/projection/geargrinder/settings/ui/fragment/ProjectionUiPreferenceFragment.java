@@ -10,6 +10,8 @@ import io.benwiegand.projection.geargrinder.R;
 public class ProjectionUiPreferenceFragment extends PreferenceFragmentCompat {
     @Override
     public void onCreatePreferences(@Nullable Bundle savedInstanceState, @Nullable String rootKey) {
+        getPreferenceManager().setSharedPreferencesName(
+                "io.benwiegand.projection.geargrinder_preferences");
         setPreferencesFromResource(R.xml.preferences_projection_ui, rootKey);
     }
 }

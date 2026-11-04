@@ -23,12 +23,22 @@ public class SettingsManager {
     public static final int SETUP_VERSION_CURRENT = 1;
     public static final int SETUP_VERSION_NONE = 0;
 
+    public static final String SPOTIFY_PLAYER_NATIVE = "native";
+    public static final String SPOTIFY_PLAYER_FLYWHEEL = "flywheel";
+    private static final String KEY_SPOTIFY_PLAYER_MODE = "spotify_player_mode";
+
     private final Context context;
     private final SharedPreferences prefs;
 
     public SettingsManager(Context context) {
         this.context = context;
         prefs = context.getSharedPreferences(PREFERENCE_NAME, Context.MODE_PRIVATE);
+    }
+
+    /** Native Spotify is the default; the custom media panel remains optional. */
+    public boolean isSpotifyCustomPlayerEnabled() {
+        return SPOTIFY_PLAYER_FLYWHEEL.equals(
+                prefs.getString(KEY_SPOTIFY_PLAYER_MODE, SPOTIFY_PLAYER_NATIVE));
     }
 
     public OperationalMode getOperationalMode() {
