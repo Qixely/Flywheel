@@ -18,36 +18,13 @@
             android:layout_weight="1"
             >
 
-            <LinearLayout
+            <!-- Native home behind the app task surface. The task manager can fully
+                 cover this without needing to change virtual display logic. -->
+            <include
+                android:id="@+id/home_dashboard"
+                layout="@layout/layout_home_dashboard"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_gravity="center"
-                android:layout_margin="12dp"
-                >
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:autoSizeTextType="uniform"
-                    android:text="@string/app_name"
-                    android:gravity="center"
-                    android:autoSizeMaxTextSize="48sp"
-                    android:lines="1"
-                    style="?attr/textAppearanceHeadline1"
-                    />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0"
-                    android:text="@string/experimental_app_warning"
-                    android:gravity="center"
-                    style="?attr/textAppearanceBody1"
-                    />
-
-            </LinearLayout>
+                android:layout_height="match_parent" />
 
             <FrameLayout
                 android:id="@+id/content_frame"
@@ -80,7 +57,7 @@
             android:orientation="horizontal"
             android:gravity="center_vertical"
             android:paddingHorizontal="8dp"
-            android:background="?attr/colorDockBackground"
+            android:background="@drawable/home_dock_background"
             >
 
             <include

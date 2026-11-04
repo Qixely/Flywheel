@@ -45,6 +45,7 @@ public class AppDock implements ProjectionTaskManager.Listener {
 
     public interface Listener {
         void onAppDrawerSelected();
+        void onHomeSelected();
     }
 
 
@@ -69,6 +70,8 @@ public class AppDock implements ProjectionTaskManager.Listener {
 
         rootView.findViewById(R.id.app_drawer_button)
                 .setOnClickListener(v -> listener.onAppDrawerSelected());
+        rootView.findViewById(R.id.home_button)
+                .setOnClickListener(v -> listener.onHomeSelected());
     }
 
     public void destroy() {

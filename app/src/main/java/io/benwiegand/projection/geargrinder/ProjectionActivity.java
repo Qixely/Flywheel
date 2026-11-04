@@ -26,6 +26,7 @@ import io.benwiegand.projection.geargrinder.makeshiftbind.MakeshiftBind;
 import io.benwiegand.projection.geargrinder.callback.MakeshiftBindCallback;
 import io.benwiegand.projection.geargrinder.pm.AppRecord;
 import io.benwiegand.projection.geargrinder.projection.ui.BatteryIndicator;
+import io.benwiegand.projection.geargrinder.projection.ui.HomeDashboard;
 import io.benwiegand.projection.geargrinder.projection.ui.MediaControlsWidget;
 import io.benwiegand.projection.geargrinder.projection.ui.NotificationDisplay;
 import io.benwiegand.projection.geargrinder.projection.ui.PhoneCallDisplay;
@@ -50,6 +51,7 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
     private SettingsManager settingsManager;
     private ProjectionTaskManager taskManager;
     private AppDock appDock;
+    private HomeDashboard homeDashboard;
     private AppDrawer appDrawer;
     private BatteryIndicator batteryIndicator;
     private NetworkIndicators networkIndicators;
@@ -92,6 +94,8 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
         // components
         taskManager = new ProjectionTaskManager(findViewById(R.id.content_frame), settingsManager);
         appDock = new AppDock(findViewById(R.id.app_dock), taskManager, this);
+
+        homeDashboard = new HomeDashboard(findViewById(R.id.home_dashboard), this, this::onAppDrawerSelected);
         appDrawer = new AppDrawer(findViewById(R.id.app_drawer), this);
         batteryIndicator = new BatteryIndicator(findViewById(R.id.battery_indicator), settingsManager);
         networkIndicators = new NetworkIndicators(findViewById(R.id.network_indicators));
@@ -134,6 +138,7 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
         connector.destroy();
 
         appDock.destroy();
+        homeDashboard.destroy();
         appDrawer.destroy();
         batteryIndicator.destroy();
         networkIndicators.destroy();
@@ -185,6 +190,17 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
     }
 
     @Override
+    public void onHomeSelected() {
+        taskManager.switchToTask(null);
+    }
+
+    @Override
+    public void onSwitchTask(ProjectionTask oldTask, boolean oldPinned,
+                             ProjectionTask newTask, boolean newPinned) {
+        findViewById(R.id.home_dashboard).setVisibility(newTask == null ? View.VISIBLE : View.GONE);
+    }
+
+    @Override
     public void onPrivdServiceConnected(PrivdService.ServiceBinder binder) {
         binder.requestDaemon(ProjectionActivity.this);
     }
@@ -192,6 +208,7 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
     @Override
     public void onPackageServiceConnected(PackageService.ServiceBinder binder) {
         appDrawer.setPackageBinder(binder);
+        homeDashboard.setPackageBinder(binder);
         notificationDisplay.setPackageServiceBinder(binder);
         taskManager.setPackageServiceBinder(binder);
     }
