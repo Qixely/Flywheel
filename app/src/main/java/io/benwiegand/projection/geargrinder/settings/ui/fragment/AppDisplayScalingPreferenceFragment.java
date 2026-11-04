@@ -58,7 +58,7 @@ public class AppDisplayScalingPreferenceFragment extends PreferenceFragmentCompa
 
         Preference explanation = new Preference(context);
         explanation.setTitle("Larger text and controls in projected apps");
-        explanation.setSummary("Only Android app windows are scaled. Your Flywheel dashboard, custom Now Playing player, and Ford projection resolution stay unchanged. Adjust while parked; reopen an app to apply changes.");
+        explanation.setSummary("Adjust the size of text and controls separately for each projected app. The main Flywheel interface is unaffected. Reopen an app to apply changes.");
         explanation.setSelectable(false);
         explanation.setIconSpaceReserved(false);
         screen.addPreference(explanation);
@@ -142,27 +142,37 @@ public class AppDisplayScalingPreferenceFragment extends PreferenceFragmentCompa
         slider.setTitle(title);
         slider.setIconSpaceReserved(false);
         slider.setPersistent(false); // SettingsManager owns the ONLY preference store.
-        slider.setMin(SettingsManager.PROJECTED_APP_DPI_MIN);
-        slider.setMax(Math.max(selectedDpi, settings.isAdvancedProjectedAppDpiEnabled()
+        // The SeekBar value is a STEP INDEX, not a raw DPI value. AndroidX
+        // SeekBarPreference can emit intermediary progress values even when
+        // setSeekBarIncrement(20) was requested. A 0..N discrete scale makes
+        // off-step DPI values impossible at the UI level.
+        final int minDpi = SettingsManager.PROJECTED_APP_DPI_MIN;
+        final int dpiStep = SettingsManager.PROJECTED_APP_DPI_STEP;
+        final int initialDpi = SettingsManager.normalizeProjectedAppDpi(selectedDpi);
+        final int upperDpi = Math.max(initialDpi, settings.isAdvancedProjectedAppDpiEnabled()
                 ? SettingsManager.PROJECTED_APP_DPI_MAX_ADVANCED
-                : SettingsManager.PROJECTED_APP_DPI_MAX));
-        slider.setSeekBarIncrement(SettingsManager.PROJECTED_APP_DPI_STEP);
-        slider.setShowSeekBarValue(true);
+                : SettingsManager.PROJECTED_APP_DPI_MAX);
+        slider.setMin(0);
+        slider.setMax((upperDpi - minDpi) / dpiStep);
+        slider.setSeekBarIncrement(1);
+        slider.setShowSeekBarValue(false); // The raw value is a step index, not DPI.
         slider.setUpdatesContinuously(false);
-        slider.setValue(selectedDpi);
-        slider.setSummary(percentageSummary(selectedDpi));
+        slider.setValue((initialDpi - minDpi) / dpiStep);
+        slider.setSummary(dpiSummary(initialDpi));
         slider.setOnPreferenceChangeListener((preference, value) -> {
-            int dpi = (Integer) value;
+            int index = (Integer) value;
+            int dpi = SettingsManager.normalizeProjectedAppDpi(minDpi + index * dpiStep);
             if (!saver.save(dpi)) return false;
-            slider.setSummary(percentageSummary(dpi));
+            slider.setSummary(dpiSummary(dpi));
             return true;
         });
         group.addPreference(slider);
         return slider;
     }
 
-    private String percentageSummary(int dpi) {
-        return Math.round(dpi * 100f / SettingsManager.PROJECTED_APP_DPI_DEFAULT)
+    private String dpiSummary(int dpi) {
+        return dpi + " DPI  |  "
+                + Math.round(dpi * 100f / SettingsManager.PROJECTED_APP_DPI_DEFAULT)
                 + "% of the original UI scale";
     }
 

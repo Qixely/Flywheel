@@ -51,14 +51,23 @@ public class SettingsManager {
                 && (dpi - PROJECTED_APP_DPI_MIN) % PROJECTED_APP_DPI_STEP == 0;
     }
 
+    /** Clamp and snap unexpected values to the nearest supported 20-DPI step. */
+    public static int normalizeProjectedAppDpi(int dpi) {
+        int bounded = Math.max(PROJECTED_APP_DPI_MIN,
+                Math.min(PROJECTED_APP_DPI_MAX_ADVANCED, dpi));
+        int steps = (bounded - PROJECTED_APP_DPI_MIN + PROJECTED_APP_DPI_STEP / 2)
+                / PROJECTED_APP_DPI_STEP;
+        return PROJECTED_APP_DPI_MIN + steps * PROJECTED_APP_DPI_STEP;
+    }
+
     public int getDefaultProjectedAppDpi() {
         int dpi = prefs.getInt(KEY_DEFAULT_PROJECTED_APP_DPI, PROJECTED_APP_DPI_DEFAULT);
         return isValidProjectedAppDpi(dpi) ? dpi : PROJECTED_APP_DPI_DEFAULT;
     }
 
     public void setDefaultProjectedAppDpi(int dpi) {
-        if (!isValidProjectedAppDpi(dpi)) throw new IllegalArgumentException("invalid DPI: " + dpi);
-        prefs.edit().putInt(KEY_DEFAULT_PROJECTED_APP_DPI, dpi).apply();
+        prefs.edit().putInt(KEY_DEFAULT_PROJECTED_APP_DPI,
+                normalizeProjectedAppDpi(dpi)).apply();
     }
 
     public boolean isAdvancedProjectedAppDpiEnabled() {
@@ -83,7 +92,7 @@ public class SettingsManager {
 
     public void setProjectedAppDpiOverride(String packageName, int dpi) {
         if (packageName == null || packageName.isEmpty()) throw new IllegalArgumentException("package name required");
-        if (dpi != 0 && !isValidProjectedAppDpi(dpi)) throw new IllegalArgumentException("invalid DPI: " + dpi);
+        if (dpi != 0) dpi = normalizeProjectedAppDpi(dpi);
         SharedPreferences.Editor edit = prefs.edit();
         String key = KEY_APP_PROJECTED_DPI_PREFIX + packageName;
         if (dpi == 0) edit.remove(key);
