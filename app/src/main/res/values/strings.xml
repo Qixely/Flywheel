@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">Flywheel</string>
+    <string name="app_display_scaling_title">App Display Scaling</string>
+    <string name="app_display_scaling_summary">Adjust the size of text and controls separately for projected apps</string>
     <string name="app_subtitle">A free and open source re-implementation of Android Auto</string>
 
     <string name="connection_foreground_notification_channel_name">Active Connection</string>

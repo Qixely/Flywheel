@@ -268,7 +268,12 @@ public class ProjectionTaskManager implements PackageService.PackageServiceListe
 
         if (oldTask != null) oldTask.detach(contentFrame);
         activeTask = newTask;
-        if (newTask != null) newTask.attach(contentFrame);
+        if (newTask != null) {
+            // Apply a saved density change on next app selection.
+            for (VirtualActivity activity : newTask.getVirtualActivities())
+                activity.refreshDisplayDensity();
+            newTask.attach(contentFrame);
+        }
         callListeners(l -> l.onSwitchTask(oldTask, oldPinned, newTask, newPinned));
 
         requestContentFocus();

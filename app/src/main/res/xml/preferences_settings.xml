@@ -31,6 +31,13 @@
             />
 
         <Preference
+            app:title="@string/app_display_scaling_title"
+            app:summary="@string/app_display_scaling_summary"
+            app:iconSpaceReserved="false"
+            android:fragment="io.benwiegand.projection.geargrinder.settings.ui.fragment.AppDisplayScalingPreferenceFragment"
+            />
+
+        <Preference
             android:title="@string/projection_ui_pref_screen_button"
             app:iconSpaceReserved="false"
             android:fragment="io.benwiegand.projection.geargrinder.settings.ui.fragment.ProjectionUiPreferenceFragment"
