@@ -1,3 +1,14 @@
+> [!NOTE]
+> **Qixely contribution: `feature/waze-autostart`**
+>
+> Launch Waze automatically when projection is unlocked and ready, without stealing focus from an app already opened.
+>
+> **[Read what changed, vehicle testing, and upstream considerations](FEATURE_BRANCH_NOTES.md)**.
+> Tested as part of the integrated [`palma2pro-working`](https://github.com/Qixely/Flywheel/tree/palma2pro-working) build; the standalone branch has not been independently rebuilt.
+> The original Flywheel maintainer's README continues below, unchanged.
+
+---
+
 # Flywheel
 > [!caution]
 > - Flywheel is experimental software.
