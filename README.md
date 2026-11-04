@@ -1,3 +1,14 @@
+> [!NOTE]
+> **Qixely contribution: `feature/per-app-dpi`**
+>
+> Choose a default projected-app DPI and optional per-app overrides without changing the head-unit projection resolution.
+>
+> **[Read what changed, vehicle testing, and upstream considerations](FEATURE_BRANCH_NOTES.md)**.
+> Tested as part of the integrated [`palma2pro-working`](https://github.com/Qixely/Flywheel/tree/palma2pro-working) build; the standalone branch has not been independently rebuilt.
+> The original Flywheel maintainer's README continues below, unchanged.
+
+---
+
 # Flywheel
 > [!caution]
 > - Flywheel is experimental software.
