@@ -1,12 +1,12 @@
 <resources>
     <style name="Base.Theme.Geargrinder" parent="Theme.Material3.DayNight.NoActionBar">
-        <item name="colorDockBackground">@color/black</item>
-        <item name="colorDockForeground">@color/white</item>
-        <item name="colorDockContainer">#303030</item>
-        <item name="colorDockItemInactive">#666666</item>
-        <item name="colorDockItemActive">?attr/colorPrimary</item>
+        <item name="colorDockBackground">#151D27</item>
+        <item name="colorDockForeground">@color/home_text</item>
+        <item name="colorDockContainer">#26343E</item>
+        <item name="colorDockItemInactive">#43515B</item>
+        <item name="colorDockItemActive">@color/home_mint</item>
         <item name="colorFocusIndicatorInactive">#333333</item>
-        <item name="colorFocusIndicatorActive">?attr/colorPrimary</item>
+        <item name="colorFocusIndicatorActive">@color/home_mint</item>
 
         <item name="colorAppModalForeground">?android:windowBackground</item>
         <item name="colorAppModalBackground">?attr/colorSurfaceContainer</item>

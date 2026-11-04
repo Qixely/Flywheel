@@ -17,6 +17,14 @@
         app:tint="?attr/colorDockForeground"
         />
 
+    <ImageButton
+        android:id="@+id/home_button"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:contentDescription="@string/home_button_content_description"
+        android:src="@drawable/home_ic_home"
+        android:background="@drawable/selectable_item_background_circular" />
+
     <Space
         android:layout_width="4dp"
         android:layout_height="4dp"

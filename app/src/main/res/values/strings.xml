@@ -1,5 +1,23 @@
 <resources>
     <string name="app_name">Flywheel</string>
+    <!-- Projected dashboard -->
+    <string name="home_brand">FLYWHEEL</string>
+    <string name="home_experimental">EXPERIMENTAL · USE ONLY WHEN PARKED</string>
+    <string name="home_navigation_kicker">NAVIGATION</string>
+    <string name="home_navigation_heading">Where to?</string>
+    <string name="home_navigation_description">Your route starts here.</string>
+    <string name="home_navigation_fallback">Choose a map app</string>
+    <string name="home_media_kicker">AUDIO</string>
+    <string name="home_media_heading">Listen in.</string>
+    <string name="home_media_fallback">Choose a music app</string>
+    <string name="home_apps_kicker">EXPLORE</string>
+    <string name="home_apps_heading">Your apps.</string>
+    <string name="home_apps_description">Everything, one tap away</string>
+    <string name="home_quick_heading">QUICK LAUNCH</string>
+    <string name="home_quick_hint">Your installed apps</string>
+    <string name="home_all_apps">All apps</string>
+    <string name="home_open_app">Open %1$s</string>
+    <string name="home_button_content_description">Home dashboard</string>
     <string name="app_subtitle">A free and open source re-implementation of Android Auto</string>
 
     <string name="connection_foreground_notification_channel_name">Active Connection</string>
@@ -173,6 +191,9 @@
     <string name="notification_drawer_pref_summary">view and read aloud missed notifications</string>
     <string name="pause_media_during_notification_tts_pref_name">Pause media while reading notifications</string>
     <string name="pause_media_during_notification_tts_pref_summary">pause instead of ducking when reading notifications aloud</string>
+    <string name="pref_category_startup">Startup</string>
+    <string name="auto_open_waze_pref_name">Open Waze after connecting</string>
+    <string name="auto_open_waze_pref_summary">Go straight to Waze when projection is ready and the phone has been unlocked. Spotify is left alone.</string>
     <string name="pref_category_dock">dock</string>
     <string name="show_media_controls_pref_name">Show media controls</string>
     <string name="show_media_controls_pref_summary">requires notification listening permission</string>
