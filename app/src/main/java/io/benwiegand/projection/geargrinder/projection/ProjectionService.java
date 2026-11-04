@@ -44,6 +44,22 @@ public class ProjectionService implements InputEventConverter.ConvertedInputEven
 
     private static final String VIRTUAL_DISPLAY_NAME = "Geargrinder projection";
 
+    // Experimental Ford SYNC 4 workaround: the first USB connection has
+    // reported a horizontal inset of about 586px on a 1920x1080/240dpi stream,
+    // reducing the usable app width to 1334px.  A reconnect reports zero.
+    // Override only that specific oversized-inset signature.  Do NOT alter
+    // the encoded video mode, vertical margin, or 0x8009/0x800A exchange.
+    private static int effectiveHorizontalMargin(VideoPreset preset) {
+        if (preset.width() == 1920
+                && preset.height() == 1080
+                && preset.density() == 240
+                && preset.marginHorizontal() >= 500
+                && preset.marginHorizontal() <= 700) {
+            return 0;
+        }
+        return preset.marginHorizontal();
+    }
+
     // privd can use system/protected flags
     private static final int PRIVD_VIRTUAL_DISPLAY_BASE_FLAGS = DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY
             | PrivdVirtualDisplayProxy.FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD
@@ -118,7 +134,7 @@ public class ProjectionService implements InputEventConverter.ConvertedInputEven
         keyguardTracker.start();
 
         CoordinateTranslator<TouchEvent.PointerLocation> coordinateTranslator = CoordinateTranslator.createTouchEvent(
-                x -> x + this.videoPreset.marginHorizontal() / 2,
+                x -> x + effectiveHorizontalMargin(this.videoPreset) / 2,
                 y -> y + this.videoPreset.marginVertical() / 2
         );
         inputEventConverter = new InputEventConverter(InputChannelMeta.getDefault(), this, coordinateTranslator, 0, videoPreset.width(), videoPreset.height(), keyguardTracker);
@@ -251,12 +267,16 @@ public class ProjectionService implements InputEventConverter.ConvertedInputEven
             if (!this.videoPreset.equals(videoPreset)) {
                 Log.d(TAG, "resizing to " + videoPreset.width() + " x " + videoPreset.height() + ", dpi = " + videoPreset.density());
 
+                if (effectiveHorizontalMargin(videoPreset) != videoPreset.marginHorizontal()) {
+                    Log.i(TAG, "Ford startup inset workaround: ignoring oversized horizontal margin "
+                            + videoPreset.marginHorizontal());
+                }
                 if (virtualDisplay != null)
                     virtualDisplay.resize(videoPreset.width(), videoPreset.height(), videoPreset.density());
 
                 inputEventConverter.setTargetDisplaySize(videoPreset.width(), videoPreset.height());
                 connector.getProjectionBinder()
-                        .ifPresent(binder -> binder.setMargins(videoPreset.marginHorizontal(), videoPreset.marginVertical()));
+                        .ifPresent(binder -> binder.setMargins(effectiveHorizontalMargin(videoPreset), videoPreset.marginVertical()));
 
                 this.videoPreset = videoPreset;
             }
@@ -296,7 +316,7 @@ public class ProjectionService implements InputEventConverter.ConvertedInputEven
     @Override
     public void onProjectionActivityConnected(ProjectionActivity.ActivityBinder binder) {
         synchronized (lock) {
-            binder.setMargins(videoPreset.marginHorizontal(), videoPreset.marginVertical());
+            binder.setMargins(effectiveHorizontalMargin(videoPreset), videoPreset.marginVertical());
 
             keyguardTracker.registerUnlockCallback(binder::onScreenUnlocked);
 
