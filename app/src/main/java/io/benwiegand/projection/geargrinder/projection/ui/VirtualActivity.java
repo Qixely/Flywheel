@@ -65,12 +65,6 @@ public class VirtualActivity implements SurfaceHolder.Callback {
 
     private static final long LOADING_SPLASH_MAX_SHOW_DURATION = 500;
 
-    // Ford SYNC 4 experiment: Spotify's projected window was 805px tall at
-    // 240dpi, i.e. sw537dp.  Spotify therefore uses its narrow phone player.
-    // Keep every other projected app at the head-unit's original density.
-    // 200dpi gives Spotify sw644dp at 805px, making its tablet UI eligible.
-    private static final int SPOTIFY_TABLET_TEST_DENSITY_DPI = 200;
-
     private final Handler handler = new Handler(Looper.getMainLooper());
 
     private final IPrivd privd;
@@ -102,13 +96,7 @@ public class VirtualActivity implements SurfaceHolder.Callback {
         this.settingsManager = settingsManager;
         width = 800;
         height = 600;
-        int defaultDensity = parent.getResources().getDisplayMetrics().densityDpi;
-        // Change only Spotify's secondary app display; never scale Waze,
-        // Flywheel's own UI or the Android Auto video stream.
-        boolean spotify = "com.spotify.music".equals(app.launchComponent().getPackageName());
-        density = spotify ? Math.min(defaultDensity, SPOTIFY_TABLET_TEST_DENSITY_DPI) : defaultDensity;
-        if (spotify) Log.i(TAG, "Spotify tablet layout experiment: display density="
-                + density + "dpi (head-unit density=" + defaultDensity + "dpi)");
+        density = parent.getResources().getDisplayMetrics().densityDpi;
         Context context = parent.getContext();
         LayoutInflater inflater = LayoutInflater.from(context);
 

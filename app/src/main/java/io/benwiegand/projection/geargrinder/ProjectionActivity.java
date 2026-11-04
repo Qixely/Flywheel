@@ -29,6 +29,7 @@ import io.benwiegand.projection.geargrinder.pm.AppRecord;
 import io.benwiegand.projection.geargrinder.projection.ui.BatteryIndicator;
 import io.benwiegand.projection.geargrinder.projection.ui.HomeDashboard;
 import io.benwiegand.projection.geargrinder.projection.ui.MediaControlsWidget;
+import io.benwiegand.projection.geargrinder.projection.ui.SpotifyNowPlayingPanel;
 import io.benwiegand.projection.geargrinder.projection.ui.NotificationDisplay;
 import io.benwiegand.projection.geargrinder.projection.ui.PhoneCallDisplay;
 import io.benwiegand.projection.geargrinder.projection.ui.task.ProjectionTask;
@@ -57,6 +58,7 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
     private BatteryIndicator batteryIndicator;
     private NetworkIndicators networkIndicators;
     private MediaControlsWidget mediaControlsWidget;
+    private SpotifyNowPlayingPanel spotifyNowPlayingPanel;
     private NotificationDisplay notificationDisplay;
     private PhoneCallDisplay phoneCallDisplay;
 
@@ -104,6 +106,11 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
         batteryIndicator = new BatteryIndicator(findViewById(R.id.battery_indicator), settingsManager);
         networkIndicators = new NetworkIndicators(findViewById(R.id.network_indicators));
         mediaControlsWidget = new MediaControlsWidget(findViewById(R.id.media_controls), handler, taskManager, connector::getPackageBinder, settingsManager);
+        spotifyNowPlayingPanel = new SpotifyNowPlayingPanel(
+                findViewById(R.id.spotify_now_playing), handler,
+                mediaControlsWidget::getSpotifyController,
+                () -> spotifyNowPlayingPanel.hide());
+        mediaControlsWidget.setSpotifySessionListener(spotifyNowPlayingPanel::refresh);
         notificationDisplay = new NotificationDisplay(findViewById(R.id.popup_notification_overlay), findViewById(R.id.notification_drawer), findViewById(R.id.notification_indicator), settingsManager);
         phoneCallDisplay = new PhoneCallDisplay(this, findViewById(R.id.popup_incoming_call_overlay));
 
@@ -118,6 +125,7 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
                 if (notificationDisplay.closeNotificationDrawer()) return;
                 if (notificationDisplay.dismissPopupNotification()) return;
                 if (appDrawer.close()) return;
+                if (spotifyNowPlayingPanel.hide()) return;
 
                 ProjectionTask task = taskManager.getActiveTask();
                 if (task != null) {
@@ -147,6 +155,7 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
         appDrawer.destroy();
         batteryIndicator.destroy();
         networkIndicators.destroy();
+        spotifyNowPlayingPanel.destroy();
         mediaControlsWidget.destroy();
         notificationDisplay.destroy();
         phoneCallDisplay.destroy();
@@ -229,8 +238,37 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
     }
 
     @Override
+    public boolean onActiveDockTaskSelected(ProjectionTask task) {
+        for (AppRecord app : task.getAppRecords()) {
+            if ("com.spotify.music".equals(app.launchComponent().getPackageName())) {
+                // When Spotify is already selected, its dock icon toggles the
+                // native Now Playing overlay. The underlying app stays put.
+                if (!spotifyNowPlayingPanel.hide()) spotifyNowPlayingPanel.show();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
     public void onSwitchTask(ProjectionTask oldTask, boolean oldPinned, ProjectionTask newTask, boolean newPinned) {
         findViewById(R.id.home_dashboard).setVisibility(newTask == null ? View.VISIBLE : View.GONE);
+
+        // Opening Spotify from Home, All Apps, or the media dock automatically
+        // reveals our wide Now Playing view. The Spotify task stays running
+        // beneath it; Back to Spotify simply hides our panel to browse music.
+        // Switching to Waze or another task closes the panel.
+        boolean spotifyOpened = false;
+        if (newTask != null) {
+            for (AppRecord app : newTask.getAppRecords()) {
+                if ("com.spotify.music".equals(app.launchComponent().getPackageName())) {
+                    spotifyOpened = true;
+                    break;
+                }
+            }
+        }
+        if (spotifyOpened) spotifyNowPlayingPanel.show();
+        else spotifyNowPlayingPanel.hide();
     }
 
     @Override
