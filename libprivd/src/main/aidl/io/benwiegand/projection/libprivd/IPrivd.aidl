@@ -23,6 +23,9 @@ interface IPrivd {
 
     void virtualDisplaySetSurface(int displayId, in Surface surface);
 
+    /** Enable Spotify landscape on one privileged app display. */
+    boolean enableSpotifyLandscape(int displayId);
+
     int createPrivilegedAudioRecordCapture(in AudioFormat audioFormat, int bufferSize, int audioSource);
 
     void destroyAudioCapture(int id);

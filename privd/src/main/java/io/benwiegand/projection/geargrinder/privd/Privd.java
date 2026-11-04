@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import io.benwiegand.projection.geargrinder.privd.audio.PrivilegedAudioRecordCapture;
@@ -58,6 +59,7 @@ public class Privd extends IPrivd.Stub {
     private final ReflectedIActivityManager ram;
 
     private long lastPingAt = 0;
+    private boolean spotifyOrientationCompatibilityEnabled = false;
 
     @SuppressLint("NotificationPermission")
     public Privd(Context context, int appUid) {
@@ -282,6 +284,60 @@ public class Privd extends IPrivd.Stub {
         virtualDisplay.setSurface(surface);
     }
 
+
+    /**
+     * The daemon runs with shell or root privileges. Regular app-side shell
+     * commands cannot change another app's compatibility or a display's WM
+     * orientation settings. Keep this entry point specific to Spotify and to
+     * an app display created and owned by this daemon.
+     *
+     * The package compatibility flag is device-wide and persists until reset;
+     * the display flag must be applied again on every new display ID.
+     */
+    @Override
+    public synchronized boolean enableSpotifyLandscape(int displayId) {
+        if (!virtualDisplays.containsKey(displayId)) {
+            Log.w(TAG, "Spotify orientation requested for unknown display " + displayId);
+            return false;
+        }
+
+        // Apply the per-display override first. User testing confirmed the
+        // combined per-display and app compatibility flags work together.
+        boolean displayOk = runPrivilegedCommand("wm", "set-ignore-orientation-request",
+                "-d", Integer.toString(displayId), "true");
+
+        if (!spotifyOrientationCompatibilityEnabled) {
+            spotifyOrientationCompatibilityEnabled = runPrivilegedCommand("am", "compat",
+                    "enable", "OVERRIDE_ANY_ORIENTATION_TO_USER", "com.spotify.music");
+        }
+
+        boolean ok = displayOk && spotifyOrientationCompatibilityEnabled;
+        if (!ok) Log.w(TAG, "could not fully enable native Spotify landscape on display " + displayId);
+        return ok;
+    }
+
+    private boolean runPrivilegedCommand(String... args) {
+        Process process = null;
+        try {
+            process = new ProcessBuilder(args).redirectErrorStream(true).start();
+            if (!process.waitFor(4, TimeUnit.SECONDS)) {
+                process.destroyForcibly();
+                Log.w(TAG, "timed out running privileged command: " + String.join(" ", args));
+                return false;
+            }
+            if (process.exitValue() != 0) {
+                Log.w(TAG, "privileged command exited with " + process.exitValue()
+                        + ": " + String.join(" ", args));
+                return false;
+            }
+            return true;
+        } catch (Exception e) {
+            Log.w(TAG, "could not run privileged command: " + String.join(" ", args), e);
+            return false;
+        } finally {
+            if (process != null) process.destroy();
+        }
+    }
 
     @Override
     public int createPrivilegedAudioRecordCapture(AudioFormat audioFormat, int bufferSize, int audioSource) throws RemoteException {
