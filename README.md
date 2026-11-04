@@ -1,3 +1,12 @@
+> [!NOTE]
+> **Qixely fork: known-good BOOX Palma 2 Pro / Ford SYNC 4 build (`palma2pro-working`)**
+>
+> This branch contains the integrated Flywheel version verified on November 4, 2026.
+> See **[features, testing, and review branches](FORK_FEATURES.md)**.
+> The original Flywheel maintainer's README continues below, unchanged.
+
+---
+
 # Flywheel
 > [!caution]
 > - Flywheel is experimental software.
