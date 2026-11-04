@@ -39,8 +39,8 @@ public final class HomeDashboard implements PackageService.PackageServiceListene
     };
 
     private static final String[] MEDIA_PACKAGES = {
-            "com.spotify.music",
             "org.videolan.vlc",
+            "com.spotify.music",
             "com.google.android.apps.youtube.music",
             "com.musicolet.music",
             "com.maxmpz.audioplayer",
