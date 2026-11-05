@@ -3,6 +3,21 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <PreferenceCategory
+        app:title="@string/pref_category_startup"
+        app:iconSpaceReserved="false"
+        >
+
+        <ListPreference
+            app:key="@string/key_auto_launch_app"
+            app:iconSpaceReserved="false"
+            app:title="@string/auto_launch_app_pref_name"
+            app:defaultValue=""
+            app:useSimpleSummaryProvider="true"
+            />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
         app:title="@string/pref_category_notifications"
         app:iconSpaceReserved="false"
         >

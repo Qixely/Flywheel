@@ -43,6 +43,12 @@ public class SettingsManager {
         return saveString(R.string.key_privilege_mode, context.getString(privilegeMode.preferenceValueRes()));
     }
 
+    /** Blank unless the user has explicitly selected a startup application. */
+    public String getAutoLaunchAppPackageName() {
+        String packageName = prefs.getString(context.getString(R.string.key_auto_launch_app), "");
+        return packageName == null ? "" : packageName;
+    }
+
     public boolean allowsStartProjectionWhenLocked() {
         return getBool(R.string.key_start_projection_when_locked, R.string.start_projection_when_locked_default);
     }

@@ -170,6 +170,7 @@
     <string translatable="false" name="key_privilege_mode">privilege_mode</string>
     <string translatable="false" name="key_operational_mode">operational_mode</string>
 
+    <string translatable="false" name="key_auto_launch_app">auto_launch_app</string>
     <string translatable="false" name="key_start_projection_when_locked">start_projection_when_locked</string>
     <string translatable="false" name="key_projection_resume_grace_period">projection_resume_grace_period</string>
 

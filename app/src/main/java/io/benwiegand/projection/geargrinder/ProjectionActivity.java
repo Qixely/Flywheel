@@ -39,7 +39,7 @@ import io.benwiegand.projection.geargrinder.projection.ui.ProjectionModal;
 import io.benwiegand.projection.geargrinder.settings.SettingsManager;
 import io.benwiegand.projection.libprivd.IPrivd;
 
-public class ProjectionActivity extends AppCompatActivity implements MakeshiftBindCallback, IPCConnectionListener, GeargrinderServiceConnector.ConnectionListener, AppDock.Listener, AppLauncherListener, ProjectionTaskManager.Listener {
+public class ProjectionActivity extends AppCompatActivity implements MakeshiftBindCallback, IPCConnectionListener, GeargrinderServiceConnector.ConnectionListener, AppDock.Listener, AppLauncherListener, ProjectionTaskManager.Listener, PackageService.PackageServiceListener {
     private static final String TAG = ProjectionActivity.class.getSimpleName();
 
     private final Handler handler = new Handler(Looper.getMainLooper());
@@ -61,6 +61,10 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
 
     private GeargrinderServiceConnector connector;
     private IPrivd privd = null;
+    private PackageService.ServiceBinder packageBinder;
+    private boolean packageListReady = false;
+    private boolean projectionUnlocked = false;
+    private boolean startupAppHandled = false;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -127,6 +131,7 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
         super.onDestroy();
         Log.d(TAG, "onDestroy");
 
+        if (packageBinder != null) packageBinder.unregisterListener(this);
         taskManager.unregisterListener(this);
         taskManager.destroy();
 
@@ -165,6 +170,33 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
         return handled || super.onKeyDown(keyCode, event);
     }
 
+    /** Launch at most once, after unlock, app discovery, and privileged display setup. */
+    private void maybeAutoLaunchApp() {
+        if (startupAppHandled || isFinishing() || isDestroyed()) return;
+
+        String packageName = settingsManager.getAutoLaunchAppPackageName();
+        if (packageName.isEmpty()) {
+            startupAppHandled = true; // Default: stay on Flywheel's own home screen.
+            return;
+        }
+        if (!projectionUnlocked || !packageListReady || privd == null || packageBinder == null) return;
+
+        startupAppHandled = true;
+        if (taskManager.getActiveTask() != null) {
+            Log.i(TAG, "skipping auto-launch: another task is active");
+            return;
+        }
+
+        // Trust the same launchable-app registry as Flywheel's All Apps drawer.
+        AppRecord app = packageBinder.getApp(packageName);
+        if (app == null || packageName.equals(getPackageName())) {
+            Log.w(TAG, "auto-launch app missing or unsupported: " + packageName);
+            return;
+        }
+        Log.i(TAG, "auto-launching " + packageName);
+        taskManager.dynamicOpenSingle(app);
+    }
+
     @Override
     public void onAppSelected(AppRecord app) {
         taskManager.dynamicOpenSingle(app);
@@ -194,6 +226,14 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
         appDrawer.setPackageBinder(binder);
         notificationDisplay.setPackageServiceBinder(binder);
         taskManager.setPackageServiceBinder(binder);
+        packageBinder = binder;
+        binder.registerListener(this);
+    }
+
+    @Override
+    public void onPackageListUpdated(PackageService.ServiceBinder binder) {
+        packageListReady = true;
+        handler.post(this::maybeAutoLaunchApp);
     }
 
     @Override
@@ -205,6 +245,7 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
     public void onPrivdConnected(IPrivd privd) {
         this.privd = privd;
         taskManager.onPrivdConnected(privd);
+        handler.post(this::maybeAutoLaunchApp);
     }
 
     @Override
@@ -242,6 +283,8 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
             runOnUiThread(() -> {
                 findViewById(R.id.projection_root).setVisibility(View.VISIBLE);
                 keyguardModal.close();
+                projectionUnlocked = true;
+                maybeAutoLaunchApp();
             });
         }
 

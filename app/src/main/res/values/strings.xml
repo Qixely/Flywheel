@@ -165,6 +165,10 @@
     <string name="allow_virtual_activity_launcher_summary">disable this if apps fail to launch</string>
 
     <string name="projection_ui_pref_screen_button">Projection UI</string>
+    <string name="pref_category_startup">startup</string>
+    <string name="auto_launch_app_pref_name">Auto-launch app on connection</string>
+    <string name="auto_launch_app_none">None</string>
+    <string name="auto_launch_app_unavailable">Unavailable app: %1$s</string>
     <string name="pref_category_notifications">notifications</string>
     <string name="popup_notifications_pref_name">Popup notifications</string>
     <string name="popup_notifications_pref_summary">show new notifications on screen</string>
