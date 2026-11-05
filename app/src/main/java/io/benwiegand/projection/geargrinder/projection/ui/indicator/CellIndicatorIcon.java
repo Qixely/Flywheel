@@ -27,7 +27,7 @@ public class CellIndicatorIcon extends DrawableWrapper {
     }
 
     public void update(int bars, boolean noData, boolean limited) {
-        assert bars >= 0 && bars <= CELL_BARS;
+        // Some Android implementations report more levels than this icon supports.
         bars = Math.clamp(bars, 0, CELL_BARS);
 
         cellLevels.setLevel(bars);
