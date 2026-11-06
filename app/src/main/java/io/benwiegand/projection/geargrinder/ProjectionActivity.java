@@ -69,7 +69,7 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
     private PackageService.ServiceBinder packageBinder;
     private boolean packageListReady = false;
     private boolean projectionUnlocked = false;
-    private boolean startupWazeHandled = false;
+    private boolean startupAppHandled = false;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -185,32 +185,34 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
     }
 
     /**
-     * Startup runs only after the phone unlocks, the installed-app list is ready,
-     * and the privileged projection launcher is connected. Never steal focus
-     * from an app the driver already opened. The music app is not touched.
+     * Start a user-selected, launchable app at most once per projection session.
+     * Wait for unlock, package discovery and the privileged launcher so this
+     * follows the same safe startup path as the previous Waze-only option.
      */
-    private void maybeAutoOpenWaze() {
-        if (startupWazeHandled || isFinishing() || isDestroyed()) return;
-        if (!settingsManager.isAutoOpenWazeEnabled()) {
-            startupWazeHandled = true;
+    private void maybeAutoLaunchApp() {
+        if (startupAppHandled || isFinishing() || isDestroyed()) return;
+
+        String packageName = settingsManager.getAutoLaunchAppPackageName();
+        if (packageName.isEmpty()) {
+            startupAppHandled = true; // None: stay on the Flywheel dashboard.
             return;
         }
         if (!projectionUnlocked || !packageListReady || privd == null || packageBinder == null) return;
 
-        // Once ready, make a single decision for this projection activity.
-        // Do not keep retrying if Waze is missing or the user has opened an app.
-        startupWazeHandled = true;
+        // Make a single decision for this projection session. Never take over
+        // a task that the driver already opened, or retry missing apps.
+        startupAppHandled = true;
         if (taskManager.getActiveTask() != null) {
-            Log.i(TAG, "skipping Waze auto-open: an app is already active");
+            Log.i(TAG, "skipping startup app: another app is already active");
             return;
         }
-        AppRecord waze = packageBinder.getApp("com.waze");
-        if (waze == null) {
-            Log.i(TAG, "Waze is not available; keeping the dashboard visible");
+        AppRecord startupApp = packageBinder.getApp(packageName);
+        if (startupApp == null) {
+            Log.w(TAG, "startup app is not installed or launchable: " + packageName);
             return;
         }
-        Log.i(TAG, "automatically opening Waze on the projected display");
-        taskManager.dynamicOpenSingle(waze);
+        Log.i(TAG, "automatically opening " + packageName + " on the projected display");
+        taskManager.dynamicOpenSingle(startupApp);
     }
 
     @Override
@@ -290,7 +292,7 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
     @Override
     public void onPackageListUpdated(PackageService.ServiceBinder binder) {
         packageListReady = true;
-        handler.post(this::maybeAutoOpenWaze);
+        handler.post(this::maybeAutoLaunchApp);
     }
 
     @Override
@@ -302,7 +304,7 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
     public void onPrivdConnected(IPrivd privd) {
         this.privd = privd;
         taskManager.onPrivdConnected(privd);
-        handler.post(this::maybeAutoOpenWaze);
+        handler.post(this::maybeAutoLaunchApp);
     }
 
     @Override
@@ -341,7 +343,7 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
                 findViewById(R.id.projection_root).setVisibility(View.VISIBLE);
                 keyguardModal.close();
                 projectionUnlocked = true;
-                maybeAutoOpenWaze();
+                maybeAutoLaunchApp();
             });
         }
 

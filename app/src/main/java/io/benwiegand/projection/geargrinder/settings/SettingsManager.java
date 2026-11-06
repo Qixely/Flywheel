@@ -144,8 +144,14 @@ public class SettingsManager {
         return saveString(R.string.key_privilege_mode, context.getString(privilegeMode.preferenceValueRes()));
     }
 
-    public boolean isAutoOpenWazeEnabled() {
-        return getBool(R.string.key_auto_open_waze, R.string.auto_open_waze_default);
+    /**
+     * Empty by default: the Flywheel dashboard should remain visible unless
+     * a user explicitly chooses a startup app. The retired Waze-only setting
+     * is intentionally not inherited.
+     */
+    public String getAutoLaunchAppPackageName() {
+        String value = prefs.getString(context.getString(R.string.key_auto_launch_app), "");
+        return value == null ? "" : value;
     }
 
     public boolean allowsStartProjectionWhenLocked() {

@@ -1,8 +1,10 @@
 > [!NOTE]
-> **Qixely fork: known-good BOOX Palma 2 Pro / Ford SYNC 4 build (`palma2pro-working`)**
+> **Qixely fork: personal BOOX Palma 2 Pro / Ford SYNC 4 build (`palma2pro-working`)**
 >
-> This branch contains the integrated Flywheel version verified on November 4, 2026.
+> This branch contains an integrated Flywheel build with additional November 5, 2026 fixes. Long-duration stability is still being evaluated.
 > See **[features, testing, and review branches](FORK_FEATURES.md)**.
+> <!-- Qixely-personal-cell-signal-note -->
+> **Crash fix (cell bars):** Some Android devices report a signal level of 5, while Flywheel shows at most 4 bars. The previous assertion caused a fatal crash; this branch retains the clamp and removes that assertion. See the [focused fix branch](https://github.com/Qixely/Flywheel/tree/fix/clamp-cellular-signal-level) for reproduction, the source change, and tests.
 > The original Flywheel maintainer's README continues below, unchanged.
 
 ---
