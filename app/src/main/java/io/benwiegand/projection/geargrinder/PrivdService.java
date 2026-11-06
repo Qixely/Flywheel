@@ -56,6 +56,16 @@ public class PrivdService extends Service {
         super.onDestroy();
         Log.d(TAG, "onDestroy");
         synchronized (lock) {
+            // The launcher may forcibly kill privd on teardown. Ask it to
+            // restore the physical panel first, but only if it was switched
+            // off by this daemon. Do not wake an otherwise sleeping phone.
+            if (privd != null) {
+                try {
+                    privd.restorePhysicalDisplayPowerIfNeeded();
+                } catch (Throwable t) {
+                    Log.w(TAG, "could not restore panel before daemon teardown", t);
+                }
+            }
             privd = null;
             if (privdLauncher != null)
                 privdLauncher.destroy();

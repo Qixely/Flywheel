@@ -160,6 +160,8 @@
 
     <string name="keep_screen_awake_pref_name">Prevent display sleep while connected</string>
     <string name="keep_screen_awake_summary">avoids issues with touch input and display output</string>
+    <string name="physical_display_off_pref_name">Power off phone display during projection (experimental)</string>
+    <string name="physical_display_off_summary">Tries to switch off the physical screen while keeping the car display active; requires root or Shizuku and device support. Normally restores the screen on disconnect; recovery may vary by device.</string>
 
     <string name="allow_virtual_activity_launcher_pref_name">Allow virtual activity launcher</string>
     <string name="allow_virtual_activity_launcher_summary">disable this if apps fail to launch</string>

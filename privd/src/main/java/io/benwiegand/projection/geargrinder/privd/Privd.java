@@ -34,6 +34,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import io.benwiegand.projection.geargrinder.privd.audio.PrivilegedAudioRecordCapture;
+import io.benwiegand.projection.geargrinder.privd.display.PhysicalDisplayPower;
 import io.benwiegand.projection.geargrinder.privd.reflected.ReflectedIActivityManager;
 import io.benwiegand.projection.geargrinder.privd.reflected.ReflectedInputEvent;
 import io.benwiegand.projection.geargrinder.privd.reflected.ReflectedInputManager;
@@ -58,6 +59,7 @@ public class Privd extends IPrivd.Stub {
     private final ReflectedIActivityManager ram;
 
     private long lastPingAt = 0;
+    private final PhysicalDisplayPower physicalDisplayPower = new PhysicalDisplayPower();
 
     @SuppressLint("NotificationPermission")
     public Privd(Context context, int appUid) {
@@ -121,8 +123,20 @@ public class Privd extends IPrivd.Stub {
         handler.postDelayed(() -> {
             if (lastPingAt > pingAt) return;
             Log.w(TAG, "ping timeout reached");
+            // Do not leave the user with a black phone when the client dies.
+            physicalDisplayPower.restoreIfNecessary();
             System.exit(0);
         }, PING_TIMEOUT);
+    }
+
+    @Override
+    public boolean setPhysicalDisplayPower(boolean on) {
+        return physicalDisplayPower.setPowered(on);
+    }
+
+    @Override
+    public void restorePhysicalDisplayPowerIfNeeded() {
+        physicalDisplayPower.restoreIfNecessary();
     }
 
     @Override

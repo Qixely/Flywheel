@@ -126,6 +126,7 @@
 
 
     <string translatable="false" name="keep_screen_awake_default">true</string>
+    <string translatable="false" name="physical_display_off_default">false</string>
 
 
     <string translatable="false" name="use_imported_keys_default">false</string>
@@ -187,6 +188,7 @@
     <string translatable="false" name="key_use_imported_phone_keys">use_imported_phone_keys</string>
 
     <string translatable="false" name="key_keep_screen_awake">keep_screen_awake</string>
+    <string translatable="false" name="key_physical_display_off">physical_display_off</string>
 
     <string translatable="false" name="key_allow_virtual_activity_launcher">allow_virtual_activity_launcher</string>
 

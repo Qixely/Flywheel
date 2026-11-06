@@ -71,6 +71,10 @@ public class SettingsManager {
         return getBool(R.string.key_keep_screen_awake, R.string.keep_screen_awake_default);
     }
 
+    public boolean isPhysicalDisplayOffEnabled() {
+        return getBool(R.string.key_physical_display_off, R.string.physical_display_off_default);
+    }
+
     public MediaAudioCaptureMode getMediaAudioCaptureMode() {
         return MediaAudioCaptureMode.parse(context, getString(R.string.key_media_audio_capture_mode));
     }

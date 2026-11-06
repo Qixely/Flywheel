@@ -66,6 +66,15 @@
             />
 
         <io.benwiegand.projection.geargrinder.settings.MaterialSwitchPreference
+            app:key="@string/key_physical_display_off"
+            app:dependency="@string/key_keep_screen_awake"
+            app:iconSpaceReserved="false"
+            app:title="@string/physical_display_off_pref_name"
+            app:defaultValue="@string/physical_display_off_default"
+            app:summary="@string/physical_display_off_summary"
+            />
+
+        <io.benwiegand.projection.geargrinder.settings.MaterialSwitchPreference
             app:key="@string/key_allow_virtual_activity_launcher"
             app:iconSpaceReserved="false"
             app:title="@string/allow_virtual_activity_launcher_pref_name"

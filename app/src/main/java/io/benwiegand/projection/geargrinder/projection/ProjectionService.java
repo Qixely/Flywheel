@@ -13,10 +13,14 @@ import android.hardware.display.DisplayManager;
 import android.media.AudioFocusRequest;
 import android.media.AudioManager;
 import android.os.PowerManager;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.Display;
 import android.view.InputEvent;
 import android.view.Surface;
+
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import io.benwiegand.projection.geargrinder.PrivdService;
 import io.benwiegand.projection.geargrinder.ProjectionActivity;
@@ -43,6 +47,7 @@ public class ProjectionService implements InputEventConverter.ConvertedInputEven
     private static final String TAG = ProjectionService.class.getSimpleName();
 
     private static final String VIRTUAL_DISPLAY_NAME = "Geargrinder projection";
+    private static final long PANEL_OFF_DELAY_MS = 750;
 
     // privd can use system/protected flags
     private static final int PRIVD_VIRTUAL_DISPLAY_BASE_FLAGS = DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY
@@ -96,6 +101,40 @@ public class ProjectionService implements InputEventConverter.ConvertedInputEven
     private UserFriendlyException error = null;
 
     private boolean screenWakeActivityStarted = false;
+    private boolean screenWakeActivityVisible = false;
+    private boolean physicalDisplayOff = false;
+    private final Handler displayPowerHandler = new Handler(Looper.getMainLooper());
+
+    private final Runnable powerOffPanel = () -> {
+        if (dead || !started || !screenWakeActivityVisible || physicalDisplayOff) return;
+        if (!settingsManager.isKeepScreenAwakeEnabled() || !settingsManager.isPhysicalDisplayOffEnabled()) return;
+        if (privd == null) return;
+        try {
+            if (privd.setPhysicalDisplayPower(false)) {
+                physicalDisplayOff = true;
+            } else {
+                Log.w(TAG, "panel power-off unsupported, leaving wake Activity visible");
+            }
+        } catch (Throwable t) {
+            Log.w(TAG, "failed to power off physical display", t);
+        }
+    };
+
+    private final BroadcastReceiver screenWakeStateReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (ScreenWakeActivity.INTENT_ACTION_READY.equals(intent.getAction())) {
+                screenWakeActivityVisible = true;
+                if (started && settingsManager.isPhysicalDisplayOffEnabled()) {
+                    displayPowerHandler.removeCallbacks(powerOffPanel);
+                    displayPowerHandler.postDelayed(powerOffPanel, PANEL_OFF_DELAY_MS);
+                }
+            } else if (ScreenWakeActivity.INTENT_ACTION_PAUSED.equals(intent.getAction())) {
+                screenWakeActivityVisible = false;
+                restorePhysicalDisplayPower();
+            }
+        }
+    };
 
     private final BroadcastReceiver screenOffReceiver = new BroadcastReceiver() {
         @Override
@@ -128,6 +167,10 @@ public class ProjectionService implements InputEventConverter.ConvertedInputEven
         connector.bindPrivdService(BIND_AUTO_CREATE | BIND_IMPORTANT);
 
         context.registerReceiver(screenOffReceiver, new IntentFilter(Intent.ACTION_SCREEN_OFF));
+        IntentFilter wakeState = new IntentFilter();
+        wakeState.addAction(ScreenWakeActivity.INTENT_ACTION_READY);
+        wakeState.addAction(ScreenWakeActivity.INTENT_ACTION_PAUSED);
+        LocalBroadcastManager.getInstance(context).registerReceiver(screenWakeStateReceiver, wakeState);
     }
 
     public ProjectionService(Context context, Listener projectionListener) {
@@ -137,14 +180,17 @@ public class ProjectionService implements InputEventConverter.ConvertedInputEven
     public void destroy() {
         if (dead) return;
         dead = true;
+        // Restore the real panel *before* the privileged connector is torn
+        // down. This also handles an already-suspended projection.
+        restorePhysicalDisplayPower();
+        if (started) onProjectionStop();    // already paused if projection is suspended
+
+        LocalBroadcastManager.getInstance(context).unregisterReceiver(screenWakeStateReceiver);
+        context.unregisterReceiver(screenOffReceiver);
         connector.destroy();
         keyguardTracker.destroy();
         if (virtualDisplay != null)
             virtualDisplay.release();
-
-        if (started) onProjectionStop();    // already paused if projection is suspended
-
-        context.unregisterReceiver(screenOffReceiver);
     }
 
     public Throwable getError() {
@@ -180,8 +226,23 @@ public class ProjectionService implements InputEventConverter.ConvertedInputEven
 
     private void onProjectionStop() {
         Log.d(TAG, "projection stop");
+        restorePhysicalDisplayPower();
         pauseMedia();
         stopScreenWakeActivity();
+    }
+
+    private void restorePhysicalDisplayPower() {
+        displayPowerHandler.removeCallbacks(powerOffPanel);
+        if (!physicalDisplayOff || privd == null) return;
+        try {
+            if (privd.setPhysicalDisplayPower(true)) {
+                physicalDisplayOff = false;
+            } else {
+                Log.e(TAG, "could not restore physical display power");
+            }
+        } catch (Throwable t) {
+            Log.e(TAG, "failed to restore physical display power", t);
+        }
     }
 
     private void pauseMedia() {

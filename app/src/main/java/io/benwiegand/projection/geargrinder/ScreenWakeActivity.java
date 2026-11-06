@@ -17,6 +17,7 @@ import android.view.WindowManager;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -28,6 +29,8 @@ public class ScreenWakeActivity extends AppCompatActivity {
     private static final String TAG = ScreenWakeActivity.class.getSimpleName();
 
     public static final String INTENT_ACTION_FINISH = "io.benwiegand.projection.geargrinder.ScreenWakeActivity.FINISH";
+    public static final String INTENT_ACTION_READY = "io.benwiegand.projection.geargrinder.ScreenWakeActivity.READY";
+    public static final String INTENT_ACTION_PAUSED = "io.benwiegand.projection.geargrinder.ScreenWakeActivity.PAUSED";
 
     // moves the info section for burn-in reduction
     private static final long MOVE_INFO_SECTION_INTERVAL = 60000;
@@ -86,6 +89,28 @@ public class ScreenWakeActivity extends AppCompatActivity {
         maxDoubleTapGroupingDistance = dpToPx(this, MAX_DOUBLE_TAP_GROUPING_DISTANCE_DP);
 
         onIntent(getIntent());
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Wait until the keep-awake Activity is visible before switching off
+        // the panel. This preserves Android's interactive state for projection.
+        LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(INTENT_ACTION_READY));
+    }
+
+    @Override
+    protected void onPause() {
+        // Unlocking, switching apps, or leaving projection must restore the
+        // physical panel before this keep-awake Activity disappears.
+        LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(INTENT_ACTION_PAUSED));
+        super.onPause();
+    }
+
+    @Override
+    protected void onDestroy() {
+        handler.removeCallbacksAndMessages(null);
+        super.onDestroy();
     }
 
     @Override
