@@ -2,7 +2,7 @@
 > [!NOTE]
 > **Qixely focused feature: select which app auto-launches after projection starts**
 >
-> Replaces the Waze-only auto-launch switch with a picker for **None (default)** or any installed app Flywheel recognizes as launchable. Startup waits for the projection launcher, app discovery, and phone unlock, then launches once per session unless the user has already chosen an app.
+> Adds an auto-launch switch with a picker for **None (default)** or any installed app Flywheel recognizes as launchable. Startup waits for the projection launcher, app discovery, and phone unlock, then launches once per session unless the user has already chosen an app.
 >
 > **[Behavior, migration, and testing](SELECTABLE_STARTUP_APP.md)**. This is the isolated feature branch; [`palma2pro-working`](https://github.com/Qixely/Flywheel/tree/palma2pro-working) contains the combined personal build.
 
