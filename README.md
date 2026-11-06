@@ -1,3 +1,15 @@
+<!-- Qixely-cellular-fix-branch -->
+> [!NOTE]
+> **Qixely focused fix: cellular signal levels above the icon range**
+>
+> **Problem:** On a stock BOOX Palma 2 Pro, a reported level of **5** caused an `AssertionError` in `CellIndicatorIcon.update()`, terminating Flywheel and dropping Android Auto projection.
+>
+> **Fix:** Remove the range assertion before the existing `Math.clamp(bars, 0, CELL_BARS)` call. The icon still shows at most **4 bars**; unexpected levels no longer crash the UI.
+>
+> **[Reproduction, source change, and test notes](CELL_SIGNAL_FIX.md)**. This focused branch contains the general compatibility fix, not the Ford/Spotify/DPI modifications from [`palma2pro-working`](https://github.com/Qixely/Flywheel/tree/palma2pro-working).
+
+---
+
 # Flywheel
 > [!caution]
 > - Flywheel is experimental software.
