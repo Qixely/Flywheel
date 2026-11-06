@@ -27,7 +27,7 @@ public class CellIndicatorIcon extends DrawableWrapper {
     }
 
     public void update(int bars, boolean noData, boolean limited) {
-        assert bars >= 0 && bars <= CELL_BARS;
+        // Some devices report more signal levels than this icon can display.
         bars = Math.clamp(bars, 0, CELL_BARS);
 
         cellLevels.setLevel(bars);
